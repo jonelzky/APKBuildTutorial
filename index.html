@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ChiNhel APK Builder Tutorial</title>
+<style>
+:root{--bg:#0a0f1f;--card:#162032;--text:#e2e8f0;--green:#22c55e;--blue:#3b82f6;--yellow:#eab308;--red:#ef4444;--cyan:#22d3ee}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:system-ui;line-height:1.6;padding:12px}
+.header{background:linear-gradient(135deg,#0a0f1f,#162032);border:1px solid #22304a;border-radius:18px;padding:20px;text-align:center;margin-bottom:12px}
+.header h1{background:linear-gradient(90deg,#22d3ee,#a855f7,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:22px;font-weight:900}
+.header p{color:#94a3b8;font-size:12px;margin-top:6px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 0;position:sticky;top:0;background:var(--bg);z-index:20}
+.tab{white-space:nowrap;background:var(--card);border:1px solid #22304a;color:#94a3b8;padding:9px 16px;border-radius:22px;font-size:11px;font-weight:800;cursor:pointer}
+.tab.active{background:var(--cyan);color:#0a0f1f;border-color:var(--cyan)}
+.search{width:100%;padding:12px;border-radius:12px;border:1px solid #22304a;background:var(--card);color:white;margin:10px 0;outline:none}
+.card{background:var(--card);border:1px solid #22304a;border-radius:14px;padding:14px;margin-bottom:12px}
+.card h3{font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:900}
+.badge-green{background:#14532d;color:#22c55e}
+.badge-blue{background:#1e3a5f;color:#60a5fa}
+.badge-yellow{background:#422006;color:#facc15}
+.badge-red{background:#450a0a;color:#f87171}
+.badge-cyan{background:#083344;color:#22d3ee}
+.code{background:#0a0f1f;border:1px solid #1e293b;border-left:3px solid var(--green);padding:10px;border-radius:8px;font-family:monospace;font-size:11px;overflow-x:auto;margin:8px 0;white-space:pre-wrap;word-break:break-all}
+.code-red{border-left-color:var(--red)}
+.code-yellow{border-left-color:var(--yellow)}
+.code-blue{border-left-color:var(--blue)}
+.copy-btn{background:var(--blue);color:white;border:none;padding:5px 10px;border-radius:6px;font-size:10px;margin-top:6px;cursor:pointer}
+.step{counter-increment:step;position:relative;padding-left:28px;margin:10px 0}
+.step::before{content:counter(step);position:absolute;left:0;top:0;background:var(--cyan);color:#0a0f1f;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900}
+ol{list-style:none;counter-reset:step}
+.err{background:#1a1010;border:1px solid #3a1a1a;border-radius:10px;padding:10px;margin:8px 0}
+.err-title{color:#f87171;font-weight:800;font-size:12px}
+.fix{color:#22c55e;font-size:11px;margin-top:6px}
+</style>
+</head><body>
+<div class="header">
+<h1>ChiNhel APK Builder Pro</h1>
+<p>Complete Termux APK Build Tutorial • Offline • From 0 to APK • Lahat ng error na-fix natin sa BSRTSum!</p>
+<p style="margin-top:8px;color:#22d3ee;font-size:11px">4 APPS BUILT PURELY SA PHONE: BSRTSum • UtilityCalc • TermuxFULL 1179 • Pad Pro</p>
+</div>
+
+<div class="tabs" id="tabs">
+<div class="tab active" onclick="showTab('SETUP')">1. SETUP</div>
+<div class="tab" onclick="showTab('STRUCTURE')">2. STRUCTURE</div>
+<div class="tab" onclick="showTab('BUILD')">3. BUILD COMMANDS</div>
+<div class="tab" onclick="showTab('ERROR')">4. TROUBLESHOOT</div>
+<div class="tab" onclick="showTab('SIGN')">5. SIGN & INSTALL</div>
+<div class="tab" onclick="showTab('GITHUB')">6. GITHUB</div>
+</div>
+
+<input class="search" id="s" placeholder="Search... ex: ClassNotFound, aapt, dex, package" oninput="filter()">
+
+<div id="list">
+
+<!-- SETUP -->
+<div class="card" data-tab="SETUP">
+<h3><span class="badge badge-cyan">SETUP</span> 1. Install Lahat ng Kailangan (One-time)</h3>
+<div class="code">pkg update -y
+pkg install -y aapt apksigner openjdk-17 android-tools termux-tools
+# check android jar
+ls ~/android-sdk/platforms/
+# dapat may android-33 o android-34
+# kung wala, download mo:
+# sdkmanager --install "platforms;android-33" "build-tools;33.0.2"</div>
+<button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent)">Copy</button>
+<div style="font-size:11px;color:#94a3b8;margin-top:8px">Ito na yung 1179 commands mo na! Naka-install na lahat! Dapat may: aapt, aapt2, d8, apksigner, javac</div>
+</div>
+
+<div class="card" data-tab="SETUP">
+<h3><span class="badge badge-green">VARS</span> Important Variables (lagay mo sa ~/.bashrc)</h3>
+<div class="code">ANDROID_JAR=$HOME/android-sdk/platforms/android-33/android.jar
+[ ! -f "$ANDROID_JAR" ] && ANDROID_JAR=$HOME/android-sdk/platforms/android-34/android.jar
+D8=$(find $HOME/android-sdk/build-tools -name d8 | head -n 1)
+echo $ANDROID_JAR
+echo $D8
+# dapat may output pareho, hindi empty!</div>
+</div>
+
+<!-- STRUCTURE -->
+<div class="card" data-tab="STRUCTURE">
+<h3><span class="badge badge-blue">STRUCTURE</span> 2. Tamang Project Structure</h3>
+<div class="code">~/MyApp_Final/
+├── app/src/main/
+│   ├── AndroidManifest.xml  <- package name dito!
+│   ├── java/com/myapp/app/
+│   │   └── MainActivity.java <- package name DAPAT SAME!
+│   ├── res/values/
+│   │   └── strings.xml
+│   └── assets/
+│       └── index.html  <- yung HTML mo!
+└── bin/  <- dito lalabas yung APK</div>
+<div style="font-size:11px;color:#eab308;margin-top:8px">⚠️ PINAKA-IMPORTANT: Yung package sa AndroidManifest.xml DAPAT SAME sa package sa MainActivity.java!<br>Manifest: package="com.bsrtsum.app" -> Java: package com.bsrtsum.app; -> MainActivity.java nasa folder .../com/bsrtsum/app/</div>
+</div>
+
+<div class="card" data-tab="STRUCTURE">
+<h3>Sample AndroidManifest.xml</h3>
+<div class="code">&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.bsrtsum.app"&gt;
+    &lt;uses-sdk android:minSdkVersion="21" android:targetSdkVersion="33" /&gt;
+    &lt;uses-permission android:name="android.permission.INTERNET"/&gt;
+    &lt;application android:label="@string/app_name" android:theme="@android:style/Theme.NoTitleBar"&gt;
+        &lt;activity android:name=".MainActivity" android:exported="true"&gt;
+            &lt;intent-filter&gt;&lt;action android:name="android.intent.action.MAIN"/&gt;&lt;category android:name="android.intent.category.LAUNCHER"/&gt;&lt;/intent-filter&gt;
+        &lt;/activity&gt;
+    &lt;/application&gt;
+&lt;/manifest&gt;</div>
+</div>
+
+<div class="card" data-tab="STRUCTURE">
+<h3>Sample MainActivity.java (WebView + File Upload Fix)</h3>
+<div class="code">package com.bsrtsum.app;
+import android.app.Activity; import android.os.Bundle; import android.webkit.*;
+import android.content.Intent; import android.net.Uri;
+public class MainActivity extends Activity {
+    WebView wv;
+    ValueCallback&lt;Uri[]&gt; filePathCallback;
+    final int FILE_REQ = 1;
+    protected void onCreate(Bundle b){
+        super.onCreate(b);
+        wv=new WebView(this);
+        wv.setWebChromeClient(new WebChromeClient(){
+            public boolean onShowFileChooser(WebView view, ValueCallback&lt;Uri[]&gt; cb, FileChooserParams params){
+                filePathCallback=cb;
+                Intent intent=new Intent(Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                String[] mimes={"application/pdf","text/plain","application/msword"};
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes);
+                startActivityForResult(Intent.createChooser(intent,"Choose File"), FILE_REQ);
+                return true;
+            }
+        });
+        wv.setWebViewClient(new WebViewClient());
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.getSettings().setDomStorageEnabled(true);
+        wv.getSettings().setAllowFileAccess(true);
+        wv.loadUrl("file:///android_asset/index.html");
+        setContentView(wv);
+    }
+    protected void onActivityResult(int rc, int res, Intent data){
+        super.onActivityResult(rc,res,data);
+        if(rc==FILE_REQ){
+            if(filePathCallback!=null){
+                Uri[] results=null;
+                if(res==RESULT_OK && data!=null){
+                    String d=data.getDataString();
+                    if(d!=null) results=new Uri[]{Uri.parse(d)};
+                }
+                filePathCallback.onReceiveValue(results);
+                filePathCallback=null;
+            }
+        }
+    }
+    public void onBackPressed(){ if(wv!=null&&wv.canGoBack()) wv.goBack(); else super.onBackPressed(); }
+}</div>
+<div style="font-size:11px;color:#22c55e;margin-top:6px">✅ Ito yung fix sa "Choose File not clickable" — yung naging problema natin sa BSRTSum! Kailangan onShowFileChooser!</div>
+</div>
+
+<!-- BUILD -->
+<div class="card" data-tab="BUILD">
+<h3><span class="badge badge-green">BUILD</span> 3. COMPLETE BUILD COMMANDS (Copy-Paste Lahat!)</h3>
+<ol>
+<div class="step"><b>Step 1: aapt package - gawa R.java at unsigned APK na walang dex</b>
+<div class="code">aapt package -f -m -J app/src/main/java -M app/src/main/AndroidManifest.xml -S app/src/main/res -A app/src/main/assets -I $ANDROID_JAR -F bin/MyApp-unsigned.apk</div>
+<div style="font-size:11px;color:#94a3b8">-f force, -m make dirs, -J output R.java, -M manifest, -S res, -A assets, -I android.jar, -F output apk</div>
+</div>
+<div class="step"><b>Step 2: javac - compile Java to .class</b>
+<div class="code">javac -d bin -classpath $ANDROID_JAR -sourcepath app/src/main/java app/src/main/java/com/bsrtsum/app/*.java</div>
+<div style="font-size:11px;color:#eab308">⚠️ Dito madalas error! Dapat -d bin, hindi -d bin/classes.dex! At dapat may R.java na!</div>
+</div>
+<div class="step"><b>Step 3: d8 - convert .class to classes.dex (MOST IMPORTANT FIX!)</b>
+<div class="code"># MALI - ito yung dati nating error 8.3K APK!
+# $D8 --output bin/classes.dex bin/*.class  <- MALI! wildcard hindi nag-eexpand sa Termux!
+
+# TAMA - ito yung fix natin!
+$D8 --output bin/ --lib $ANDROID_JAR $(find bin -name "*.class")</div>
+<div style="font-size:11px;color:#22c55e">✅ FIX: --output bin/ (directory, hindi file!) + --lib $ANDROID_JAR + $(find ...) para makuha lahat ng class including R.class at R$* classes!</div>
+</div>
+<div class="step"><b>Step 4: Add dex to APK</b>
+<div class="code">cd bin
+aapt add MyApp-unsigned.apk classes.dex
+# check size - dapat 200K+ hindi 8K!
+ls -lh MyApp-unsigned.apk</div>
+</div>
+<div class="step"><b>Step 5: Sign APK</b>
+<div class="code">apksigner sign --min-sdk-version 21 --ks ~/.android/debug.keystore --ks-pass pass:android --key-pass pass:android --ks-key-alias androiddebugkey MyApp-unsigned.apk
+# output same file pero signed na!
+cp MyApp-unsigned.apk /storage/emulated/0/Download/MyApp.apk
+ls -lh /storage/emulated/0/Download/MyApp.apk
+# dapat 300K+ na, hindi 8K!</div>
+</div>
+</ol>
+</div>
+
+<!-- ERROR -->
+<div class="card" data-tab="ERROR">
+<h3><span class="badge badge-red">ERRORS</span> 4. TROUBLESHOOT - Lahat ng Error na Na-encounter Natin!</h3>
+
+<div class="err">
+<div class="err-title">❌ ERROR 1: BSRTSum keeps stopping / App keeps crashing</div>
+<div class="code code-red">java.lang.RuntimeException: Unable to instantiate activity...
+Caused by: java.lang.ClassNotFoundException: Didn't find class "com.bsrtsum.app.MainActivity"</div>
+<div class="fix">✅ FIX:<br>1. Check package name sa Manifest vs Java - DAPAT SAME!<br>Manifest package="com.bsrtsum.app" -> Java file dapat package com.bsrtsum.app;<br>2. Check kung nasa tamang folder: app/src/main/java/com/bsrtsum/app/MainActivity.java<br>3. Check kung kasama classes.dex sa APK! (aapt add ...)<br>4. Kung nag-install ka ng ibang app na same package (com.utilitycalc.app), magko-conflict! Uninstall muna:<br>pm uninstall com.bsrtsum.app --user 0 (check sa Termux)</div>
+</div>
+
+<div class="err">
+<div class="err-title">❌ ERROR 2: APK is only 8.3K / 8KB (walang laman!)</div>
+<div class="code code-red">-rw-rw---- 1 root everybody 8.3K ... MyApp.apk <- SOBRANG LIIT!</div>
+<div class="fix">✅ FIX: Hindi na-add yung classes.dex!<br>Root cause:<br>- Wildcard *.class hindi nagwo-work sa Termux d8! Dapat $(find bin -name "*.class")<br>- Mali yung output: --output bin/classes.dex (file) dapat --output bin/ (directory!)<br>- Nakalimutan --lib $ANDROID_JAR<br><br>TAMA:<br>$D8 --output bin/ --lib $ANDROID_JAR $(find bin -name "*.class")<br>cd bin && aapt add MyApp-unsigned.apk classes.dex</div>
+</div>
+
+<div class="err">
+<div class="err-title">❌ ERROR 3: R cannot be resolved / cannot find symbol R</div>
+<div class="code code-red">error: package R does not exist
+error: cannot find symbol variable layout</div>
+<div class="fix">✅ FIX: Hindi na-generate yung R.java!<br>1. Run muna aapt package -J app/src/main/java ... para mag-generate ng R.java<br>2. Check kung may res folder at strings.xml<br>3. Dapat after aapt, may app/src/main/java/com/bsrtsum/app/R.java na!</div>
+</div>
+
+<div class="err">
+<div class="err-title">❌ ERROR 4: Choose File / Upload not clickable sa WebView</div>
+<div class="code code-red">input type="file" hindi gumagana pag click</div>
+<div class="fix">✅ FIX: Kailangan ng onShowFileChooser sa WebChromeClient!<br>Yung code na nasa STRUCTURE > MainActivity.java na may ValueCallback&lt;Uri[]&gt; at onActivityResult - yan ang fix na ginawa natin sa BSRTSum!<br>Without it, hindi talaga gagana file upload sa WebView!</div>
+</div>
+
+<div class="err">
+<div class="err-title">❌ ERROR 5: Package conflict - overwrites other app</div>
+<div class="code code-red">UtilityCalc at BSRTSum parehong com.utilitycalc.app - nagpapatong!</div>
+<div class="fix">✅ FIX: Bawat app DAPAT UNIQUE package!<br>UtilityCalc = com.utilitycalc.app<br>BSRTSum = com.bsrtsum.app<br>TermuxFULL = com.chinheltermuxfull.app<br>Pad Pro = com.chinhelpadpro.app<br>Check: grep package app/src/main/AndroidManifest.xml</div>
+</div>
+
+<div class="err">
+<div class="err-title">❌ ERROR 6: aapt: command not found / javac not found / d8 not found</div>
+<div class="code code-red">bash: aapt: command not found</div>
+<div class="fix">✅ FIX:<br>pkg install aapt apksigner openjdk-17 android-tools -y<br>Tapos set variables:<br>ANDROID_JAR=$HOME/android-sdk/platforms/android-33/android.jar<br>D8=$(find $HOME/android-sdk/build-tools -name d8 | head -n 1)</div>
+</div>
+
+<div class="err">
+<div class="err-title">❌ ERROR 7: GitHub Pages 404 / index.html not found</div>
+<div class="fix">✅ FIX:<br>1. Dapat may index.html sa root ng repo, hindi lang sa docs/<br>2. Enable Pages: GitHub repo > Settings > Pages > Source: main / root > Save<br>3. Wait 2 mins, check https://jonelzky.github.io/REPO/<br>4. Push via: git add index.html && git commit -m "add index" && git push</div>
+</div>
+
+</div>
+
+<!-- SIGN -->
+<div class="card" data-tab="SIGN">
+<h3><span class="badge badge-green">SIGN</span> 5. Sign, Install, at Check</h3>
+<div class="code">apksigner sign --min-sdk-version 21 --ks ~/.android/debug.keystore --ks-pass pass:android --key-pass pass:android --ks-key-alias androiddebugkey bin/MyApp-unsigned.apk
+
+# verify
+apksigner verify bin/MyApp-unsigned.apk && echo "SIGNED OK!"
+
+# copy to Download
+cp bin/MyApp-unsigned.apk /storage/emulated/0/Download/MyApp.apk
+
+# install via termux
+pm install /storage/emulated/0/Download/MyApp.apk
+# or click lang sa File Manager
+
+# check size - dapat 300K+!
+ls -lh /storage/emulated/0/Download/MyApp.apk
+# mali pag 8K, tama pag 300K+!
+
+# check dex inside
+aapt list bin/MyApp-unsigned.apk | grep dex
+# dapat may classes.dex!</div>
+</div>
+
+<!-- GITHUB -->
+<div class="card" data-tab="GITHUB">
+<h3><span class="badge badge-blue">GITHUB</span> 6. Push sa GitHub Pages (para maging website + APK download)</h3>
+<div class="code">cd ~/MyApp_Final
+git init
+git add .
+git commit -m "Initial MyApp"
+
+# create repo via gh CLI
+gh repo create MyApp --public --source=. --remote=origin --push
+
+# create release with APK
+gh release create v1.0 bin/MyApp-unsigned.apk --title "MyApp v1.0" --notes "First release"
+
+# enable Pages sa browser: github.com/jonelzky/MyApp > Settings > Pages > main / root > Save
+
+# main hub - jonelzky.github.io repo
+cd ~/github-bsrt/jonelzky.github.io
+# edit index.html add new app card
+git add index.html
+git commit -m "Add MyApp"
+git push</div>
+<div style="font-size:11px;color:#22c55e;margin-top:8px">Yan yung ginawa natin sa BSRTSum - from 0 to live website + APK release in 10 mins!</div>
+</div>
+
+<div class="card" data-tab="BUILD">
+<h3>🎯 QUICK COPY - ONE SHOT BUILD SCRIPT (Galing sa BSRTSum_Final)</h3>
+<div class="code">cd ~/MyApp_Final
+ANDROID_JAR=$HOME/android-sdk/platforms/android-33/android.jar
+[ ! -f "$ANDROID_JAR" ] && ANDROID_JAR=$HOME/android-sdk/platforms/android-34/android.jar
+D8=$(find $HOME/android-sdk/build-tools -name d8 | head -n 1)
+aapt package -f -m -J app/src/main/java -M app/src/main/AndroidManifest.xml -S app/src/main/res -A app/src/main/assets -I $ANDROID_JAR -F bin/MyApp-unsigned.apk
+javac -d bin -classpath $ANDROID_JAR -sourcepath app/src/main/java app/src/main/java/com/myapp/app/*.java
+$D8 --output bin/ --lib $ANDROID_JAR $(find bin -name "*.class")
+cd bin && aapt add MyApp-unsigned.apk classes.dex > /dev/null
+apksigner sign --min-sdk-version 21 --ks ~/.android/debug.keystore --ks-pass pass:android --key-pass pass:android --ks-key-alias androiddebugkey MyApp-unsigned.apk
+cp MyApp-unsigned.apk /storage/emulated/0/Download/MyApp.apk
+ls -lh /storage/emulated/0/Download/MyApp.apk
+echo "DONE!"</div>
+<button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent)">Copy Build Script</button>
+</div>
+
+</div>
+
+<script>
+let curTab='SETUP';
+function showTab(t){
+  curTab=t;
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  event.target.classList.add('active');
+  filter();
+}
+function filter(){
+  const q=document.getElementById('s').value.toLowerCase();
+  let c=0;
+  document.querySelectorAll('.card').forEach(el=>{
+    const inTab=el.dataset.tab===curTab;
+    const inSearch=(el.textContent.toLowerCase().includes(q));
+    const show=inTab && inSearch;
+    el.style.display=show?'block':'none';
+    if(show) c++;
+  });
+  document.getElementById('cnt')?.remove();
+}
+filter();
+document.querySelectorAll('.card').forEach(el=>{
+  if(el.dataset.tab!==curTab) el.style.display='none';
+});
+</script>
+</body></html>
